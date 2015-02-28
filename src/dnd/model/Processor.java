@@ -6,25 +6,30 @@ import java.util.Random;
 
 public class Processor {
 	
-	private final List<Double> pts; // 各点
+	private final List<Point> pts; // 各点
 	private final List<Integer> belong_to; // 各点がどのクラスタに属するか
-	private final List<Double> clusters; // 平均が入る
+	private final List<Point> clusters; // 平均が入る
 	
 	private final Random rand = new Random(System.currentTimeMillis());
 	
 	private int gen = 0; // abbrev: generation
 	private static final int MAX_GEN = 10;
 
-	public Processor(List<Double> data) {
+	public Processor(List<Point> data) {
 		this.pts = data;
 		belong_to = new ArrayList<Integer>();
 		for (int i=0, l=data.size(); i<l; i++) {
 			belong_to.add(0);
 		}
 		
-		clusters = new ArrayList<Double>(2);
+		int dimension = data.get(0).size();
+		clusters = new ArrayList<Point>(2);
 		for (int i=0; i<2; i++) {
-			clusters.add(rand.nextDouble());
+			Point p = new Point();
+			for (int j=0; j<dimension; j++) {
+				p.append(rand.nextDouble());
+			}
+			clusters.add(p);
 		}
 	}
 
@@ -55,17 +60,17 @@ public class Processor {
 		// clustersをアップデートする
 		for (int i=0; i<clusters.size(); i++) {
 			// pts.stream().filter(p -> p > )
-			double sum = 0;
+			Point sum = new Point();
 			double num = 0;
 			for (int j=0; j<pts.size(); j++) {
 				// このクラスタに属するなら平均に加算
 				if (belong_to.get(j) == i) {
-					sum += pts.get(j);
+					sum.add(pts.get(j));
 					num++;
 				}
 			}
 			if (num==0) continue; // 0このときはアップデートしない
-			clusters.set(i, sum/num);
+			clusters.set(i, sum.divideBy(num));
 		}
 	}
 
@@ -73,14 +78,8 @@ public class Processor {
 		return clusters.stream().mapToDouble(p -> distance(p, pts.get(i))).toArray();
 	}
 
-	/**
-	 * 1次元ユークリッド距離を採用
-	 * @param p1
-	 * @param p2
-	 * @return
-	 */
-	private Double distance(Double p1, Double p2) {
-		return Math.abs(p1 - p2);
+	private Double distance(Point p, Point point) {
+		return p.distance(point);
 	}
 	
 	public void dump() {

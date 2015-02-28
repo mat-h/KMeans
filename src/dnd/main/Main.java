@@ -6,25 +6,34 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import dnd.model.Point;
 import dnd.model.Processor;
 
 public class Main {
 
 	public static void main(String[] args) throws FileNotFoundException {
 
-		List<Double> data = readCsv();
+		List<Point> data = readCsv();
 		Processor proc = new Processor(data);
 		proc.desc();
 		proc.iterate(true);
 	}
 
-	private static List<Double> readCsv() throws FileNotFoundException {
-		List<Double> data = new ArrayList<Double>();
+	private static List<Point> readCsv() throws FileNotFoundException {
+		List<Point> data = new ArrayList<Point>();
 		Scanner scanner = new Scanner(new File("C:\\r\\data\\hoge.csv"));
 		while(scanner.hasNextLine()) {
-			if (!scanner.hasNextDouble()) break;
+		
+			Point p = new Point();
+			String line = scanner.nextLine();
+			Scanner sub = new Scanner(line);
+			sub.useDelimiter(",");
+			while(sub.hasNextDouble()) {
+				p.append(sub.nextDouble());
+			}
+			sub.close();
 			
-			data.add(scanner.nextDouble());
+			data.add(p);
 		}	
 		scanner.close();
 		return data;
