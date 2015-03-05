@@ -76,6 +76,12 @@ public class Point {
 	public void updateResponsibilities() {
 		// 各クラスタとの距離を計算し、responsibilitiesに変換する
 		resp = clusters.stream().map(p -> Double.valueOf(exponential(this.distance(p)))).collect(Collectors.toList()).toArray(new Double[0]);
+		double sum = Arrays.asList(resp).stream().reduce(0.0, Double::sum);
+		resp = Arrays.asList(resp).stream().map(r -> Double.valueOf(r/sum)).collect(Collectors.toList()).toArray(new Double[0]);
+	}
+	
+	public Double[] getResp() {
+		return resp;
 	}
 
 	public double exponential(double x) {

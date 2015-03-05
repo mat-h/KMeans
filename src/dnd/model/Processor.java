@@ -46,7 +46,19 @@ public class Processor {
 		pts.forEach(p -> p.updateResponsibilities()); 
 
 		// クラスタの平均位置を計算しなおす。
+		Double[] total_resp = pts.stream().map(p -> p.getResp()).reduce(new Double[pts.get(0).getResp().length], (arr1, arr2) -> addArray(arr1, arr2));
 		clusters = pts.stream().map(p -> p.getContribution()).reduce(getEmptyPoints(clusters.size()), (p1,p2) -> addPoints(p1,p2));
+		for (int i=0,l=clusters.size(); i<l; i++) {
+			clusters.get(i).divideBy(total_resp[i]);
+		}
+	}
+
+	private Double[] addArray(Double[] arr1, Double[] arr2) {
+		Double[] arr = new Double[arr1.length];
+		for (int i=0,l=arr1.length; i<l; i++) {
+			arr[i] = ((arr1[i]==null)? 0: arr1[i]) + ((arr2[i]==null)? 0: arr2[i]);
+		}
+		return arr;
 	}
 
 	private List<Point> addPoints(List<Point> p1, List<Point> p2) {
