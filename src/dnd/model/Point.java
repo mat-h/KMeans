@@ -1,10 +1,16 @@
 package dnd.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Point {
+	private static final double BETA = 1;
 	private List<Double> coord = new ArrayList<Double>();
+	private Double[] resp = new Double[0]; // Responsibility = クラスタへの帰属度
+	private List<Point> clusters; // 外から渡す
 	
 	public int append(double newCoord) {
 		coord.add(newCoord);
@@ -15,13 +21,14 @@ public class Point {
 		return coord.size();
 	}
 
-	public void add(Point point) {
+	public Point add(Point point) {
 		if (size() < point.size()) {
 			fillZero(point.size());
 		}
 		for (int i=0, l=coord.size(); i<l; i++) {
 			coord.set(i, coord.get(i) + point.get(i));
 		}
+		return this;
 	}
 	
 	private void fillZero(int size) {
@@ -64,5 +71,37 @@ public class Point {
 		}
 		b.append("]");
 		return b.toString();
+	}
+
+	public void updateResponsibilities() {
+		// 各クラスタとの距離を計算し、responsibilitiesに変換する
+		resp = clusters.stream().map(p -> Double.valueOf(exponential(this.distance(p)))).collect(Collectors.toList()).toArray(new Double[0]);
+	}
+
+	public double exponential(double x) {
+		return Math.exp((-1.0) * BETA * x);
+	}
+
+	/**
+	 * 各クラスタに貢献ベクトルを返す。
+	 * @return size=clusters.size()
+	 */
+	public List<Point> getContribution() {
+		double sum = Arrays.asList(resp).stream().reduce(0.0, Double::sum);
+		return Arrays.asList(resp).stream().map(r -> this.multiply(r/sum)).collect(Collectors.toList());
+	}
+
+	private Point multiply(double d) {
+		Point p = emptyPoint();
+		coord.stream().forEach(x -> p.append(x*d));
+		return p;
+	}
+
+	public static Point emptyPoint() {
+		return new Point();
+	}
+
+	public void setCluster(List<Point> clusters) {
+		this.clusters = clusters;
 	}
 }

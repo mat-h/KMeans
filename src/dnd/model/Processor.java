@@ -8,7 +8,7 @@ public class Processor {
 	
 	private final List<Point> pts; // 各点
 	private final List<Integer> belong_to; // 各点がどのクラスタに属するか
-	private final List<Point> clusters; // 平均が入る
+	private List<Point> clusters; // 平均が入る
 	
 	private final Random rand = new Random(System.currentTimeMillis());
 	
@@ -31,6 +31,7 @@ public class Processor {
 			}
 			clusters.add(p);
 		}
+		pts.stream().forEach(p->p.setCluster(clusters));
 	}
 
 	public void iterate(boolean verbose) {
@@ -42,36 +43,26 @@ public class Processor {
 
 	private void update() {
 		// 各点がどのクラスタに属するかを計算しなおす。
-		// belong_toをアップデートする
-		for (int i=0; i<pts.size(); i++) {
-			double[] distances = distances(i);
-			double max = 0;
-			int max_idx = 0;
-			for (int j=0; j<clusters.size(); j++) {
-				if (distances[j] > max) {
-					max = distances[j];
-					max_idx = j;
-				}
-			}
-			belong_to.set(i, max_idx);
-		}
-		
+		pts.forEach(p -> p.updateResponsibilities()); 
+
 		// クラスタの平均位置を計算しなおす。
-		// clustersをアップデートする
-		for (int i=0; i<clusters.size(); i++) {
-			// pts.stream().filter(p -> p > )
-			Point sum = new Point();
-			double num = 0;
-			for (int j=0; j<pts.size(); j++) {
-				// このクラスタに属するなら平均に加算
-				if (belong_to.get(j) == i) {
-					sum.add(pts.get(j));
-					num++;
-				}
-			}
-			if (num==0) continue; // 0このときはアップデートしない
-			clusters.set(i, sum.divideBy(num));
+		clusters = pts.stream().map(p -> p.getContribution()).reduce(getEmptyPoints(clusters.size()), (p1,p2) -> addPoints(p1,p2));
+	}
+
+	private List<Point> addPoints(List<Point> p1, List<Point> p2) {
+		List<Point> arr = new ArrayList<Point>();
+		for (int i=0,l=p1.size(); i<l; i++) {
+			arr.add(Point.emptyPoint().add(p1.get(i)).add(p2.get(i)));
 		}
+		return arr;
+	}
+
+	private List<Point> getEmptyPoints(int size) {
+		List<Point> arr = new ArrayList<Point>();
+		for (int i=0; i<size; i++) {
+			arr.add(Point.emptyPoint());
+		}
+		return arr;
 	}
 
 	private double[] distances(int i) {
