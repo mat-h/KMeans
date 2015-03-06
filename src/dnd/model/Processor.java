@@ -57,11 +57,7 @@ public class Processor {
 	}
 
 	private List<Point> addPoints(List<Point> p1, List<Point> p2) {
-		List<Point> arr = new ArrayList<Point>();
-		for (int i=0,l=p1.size(); i<l; i++) {
-			arr.add(Point.emptyPoint().add(p1.get(i)).add(p2.get(i)));
-		}
-		return arr;
+		return IntStream.range(0, p1.size()).mapToObj(i -> Point.emptyPoint().add(p1.get(i)).add(p2.get(i))).collect(Collectors.toList());
 	}
 	
 	public void dump() {
@@ -74,7 +70,7 @@ public class Processor {
 				pts.stream().map(p -> p.getResp()[i]).reduce(0.0, Double::sum)
 				+ ". center coordinates are " + clusters.get(i)));
 
-		System.out.println("");
+		System.out.println(""); // Œ©‚â‚·‚­‚·‚é‚½‚ß
 	}
 
 	public void desc() {
