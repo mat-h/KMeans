@@ -3,6 +3,7 @@ package dnd.model;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Processor {
@@ -52,11 +53,7 @@ public class Processor {
 	}
 
 	private Double[] addArray(Double[] arr1, Double[] arr2) {
-		Double[] arr = new Double[arr1.length];
-		for (int i=0,l=arr1.length; i<l; i++) {
-			arr[i] = ((arr1[i]==null)? 0: arr1[i]) + ((arr2[i]==null)? 0: arr2[i]);
-		}
-		return arr;
+		return IntStream.range(0, arr1.length).mapToObj(i -> ((arr1[i]==null)? 0: arr1[i]) + ((arr2[i]==null)? 0: arr2[i])).collect(Collectors.toList()).toArray(new Double[0]);
 	}
 
 	private List<Point> addPoints(List<Point> p1, List<Point> p2) {
@@ -70,12 +67,13 @@ public class Processor {
 	public void dump() {
 		// 標準出力にdump
 		System.out.println("clusters state (time=" + gen + "): ");
-		for (int i=0; i<clusters.size(); i++) {
-			// 各点のクラスタ帰属度を出力
-			final int i_ = i;
-			double total_weight = pts.stream().map(p -> p.getResp()[i_]).reduce(0.0, Double::sum);
-			System.out.println("cluster " + i + "'s total weight is " + total_weight + ". center coordinates are " + clusters.get(i));
-		}
+
+		// 各点のクラスタ帰属度を出力
+		IntStream.range(0, clusters.size()).forEach(i -> 
+				System.out.println("cluster " + i + "'s total weight is " + 
+				pts.stream().map(p -> p.getResp()[i]).reduce(0.0, Double::sum)
+				+ ". center coordinates are " + clusters.get(i)));
+
 		System.out.println("");
 	}
 

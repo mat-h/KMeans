@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Point {
 	private static final double BETA = 100;
@@ -97,7 +98,7 @@ public class Point {
 	}
 
 	private Point multiply(double d) {
-		Point p = emptyPoint();
+		Point p = emptyPoint(); // ƒRƒs[‚ð¶¬‚µ‚Ä•Ô‚·
 		coord.stream().forEach(x -> p.append(x*d));
 		return p;
 	}
@@ -111,10 +112,6 @@ public class Point {
 	}
 
 	public static List<Point> getEmptyPoints(int size) {
-		List<Point> arr = new ArrayList<Point>();
-		for (int i=0; i<size; i++) {
-			arr.add(Point.emptyPoint());
-		}
-		return arr;
+		return IntStream.range(0, size).mapToObj(i -> emptyPoint()).collect(Collectors.toList());
 	}
 }
