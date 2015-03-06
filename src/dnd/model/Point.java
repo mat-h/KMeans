@@ -2,12 +2,11 @@ package dnd.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class Point {
-	private static final double BETA = 1;
+	private static final double BETA = 100;
 	private List<Double> coord = new ArrayList<Double>();
 	private Double[] resp = new Double[0]; // Responsibility = クラスタへの帰属度
 	private List<Point> clusters; // 外から渡す
@@ -109,5 +108,13 @@ public class Point {
 
 	public void setCluster(List<Point> clusters) {
 		this.clusters = clusters;
+	}
+
+	public static List<Point> getEmptyPoints(int size) {
+		List<Point> arr = new ArrayList<Point>();
+		for (int i=0; i<size; i++) {
+			arr.add(Point.emptyPoint());
+		}
+		return arr;
 	}
 }

@@ -3,11 +3,11 @@ package dnd.model;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.IntStream;
 
 public class Processor {
 	
 	private final List<Point> pts; // 各点
-	private final List<Integer> belong_to; // 各点がどのクラスタに属するか
 	private List<Point> clusters; // 平均が入る
 	
 	private final Random rand = new Random(System.currentTimeMillis());
@@ -16,12 +16,10 @@ public class Processor {
 	private static final int MAX_GEN = 10;
 
 	public Processor(List<Point> data) {
+		// 初期化
 		this.pts = data;
-		belong_to = new ArrayList<Integer>();
-		for (int i=0, l=data.size(); i<l; i++) {
-			belong_to.add(0);
-		}
-		
+
+		// cluster中心位置初期化
 		int dimension = data.get(0).size();
 		clusters = new ArrayList<Point>(2);
 		for (int i=0; i<2; i++) {
@@ -31,6 +29,8 @@ public class Processor {
 			}
 			clusters.add(p);
 		}
+		
+		// clusterを持たせる
 		pts.stream().forEach(p->p.setCluster(clusters));
 	}
 
@@ -47,10 +47,8 @@ public class Processor {
 
 		// クラスタの平均位置を計算しなおす。
 		Double[] total_resp = pts.stream().map(p -> p.getResp()).reduce(new Double[pts.get(0).getResp().length], (arr1, arr2) -> addArray(arr1, arr2));
-		clusters = pts.stream().map(p -> p.getContribution()).reduce(getEmptyPoints(clusters.size()), (p1,p2) -> addPoints(p1,p2));
-		for (int i=0,l=clusters.size(); i<l; i++) {
-			clusters.get(i).divideBy(total_resp[i]);
-		}
+		clusters = pts.stream().map(p -> p.getContribution()).reduce(Point.getEmptyPoints(clusters.size()), (p1,p2) -> addPoints(p1,p2));
+		IntStream.range(0, clusters.size()).forEach(i -> clusters.get(i).divideBy(total_resp[i]));
 	}
 
 	private Double[] addArray(Double[] arr1, Double[] arr2) {
@@ -68,35 +66,15 @@ public class Processor {
 		}
 		return arr;
 	}
-
-	private List<Point> getEmptyPoints(int size) {
-		List<Point> arr = new ArrayList<Point>();
-		for (int i=0; i<size; i++) {
-			arr.add(Point.emptyPoint());
-		}
-		return arr;
-	}
-
-	private double[] distances(int i) {
-		return clusters.stream().mapToDouble(p -> distance(p, pts.get(i))).toArray();
-	}
-
-	private Double distance(Point p, Point point) {
-		return p.distance(point);
-	}
 	
 	public void dump() {
 		// 標準出力にdump
 		System.out.println("clusters state (time=" + gen + "): ");
-		int count;
 		for (int i=0; i<clusters.size(); i++) {
-			count = 0;
-			for (int j = 0; j < pts.size(); j++) {
-				if (belong_to.get(j) == i) {
-					count++;
-				}
-			}
-			System.out.println("cluster " + i + " contains: " + count + " points. center coordinates: " + clusters.get(i));
+			// 各点のクラスタ帰属度を出力
+			final int i_ = i;
+			double total_weight = pts.stream().map(p -> p.getResp()[i_]).reduce(0.0, Double::sum);
+			System.out.println("cluster " + i + "'s total weight is " + total_weight + ". center coordinates are " + clusters.get(i));
 		}
 		System.out.println("");
 	}
