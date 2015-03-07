@@ -67,7 +67,7 @@ public class Processor {
 		// 各点のクラスタ帰属度を出力
 		IntStream.range(0, clusters.size()).forEach(i -> 
 				System.out.println("cluster " + i + "'s total weight is " + 
-				pts.stream().mapToDouble(p -> p.getResp()[i]).reduce(0.0, Double::sum)
+				pts.stream().mapToDouble(p -> p.getResp()[i]).sum()
 				+ ". center coordinates are " + clusters.get(i)));
 
 		System.out.println(""); // 見やすくするため
