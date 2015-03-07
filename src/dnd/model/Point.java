@@ -4,12 +4,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 
 public class Point {
 	private static final double BETA = 100;
 	private List<Double> coord = new ArrayList<Double>();
-	private Double[] resp = new Double[0]; // Responsibility = クラスタへの帰属度
+	private double[] resp = new double[0]; // Responsibility = クラスタへの帰属度
 	private List<Point> clusters; // 外から渡す
 	
 	public int append(double newCoord) {
@@ -75,12 +76,12 @@ public class Point {
 
 	public void updateResponsibilities() {
 		// 各クラスタとの距離を計算し、responsibilitiesに変換する
-		resp = clusters.stream().map(p -> Double.valueOf(exponential(this.distance(p)))).collect(Collectors.toList()).toArray(new Double[0]);
-		double sum = Arrays.asList(resp).stream().reduce(0.0, Double::sum);
-		resp = Arrays.asList(resp).stream().map(r -> Double.valueOf(r/sum)).collect(Collectors.toList()).toArray(new Double[0]);
+		resp = clusters.stream().mapToDouble(p -> exponential(this.distance(p))).toArray();
+		double sum = DoubleStream.of(resp).sum();
+		resp = DoubleStream.of(resp).map(r -> r/sum).toArray();
 	}
 	
-	public Double[] getResp() {
+	public double[] getResp() {
 		return resp;
 	}
 
@@ -93,8 +94,8 @@ public class Point {
 	 * @return size=clusters.size()
 	 */
 	public List<Point> getContribution() {
-		double sum = Arrays.asList(resp).stream().reduce(0.0, Double::sum);
-		return Arrays.asList(resp).stream().map(r -> this.multiply(r/sum)).collect(Collectors.toList());
+		double sum = DoubleStream.of(resp).sum();
+		return DoubleStream.of(resp).mapToObj(r -> this.multiply(r/sum)).collect(Collectors.toList());
 	}
 
 	private Point multiply(double d) {

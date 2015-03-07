@@ -47,13 +47,13 @@ public class Processor {
 		pts.forEach(p -> p.updateResponsibilities()); 
 
 		// クラスタの平均位置を計算しなおす。
-		Double[] total_resp = pts.stream().map(p -> p.getResp()).reduce(new Double[pts.get(0).getResp().length], (arr1, arr2) -> addArray(arr1, arr2));
+		double[] total_resp = pts.stream().map(p -> p.getResp()).reduce(new double[pts.get(0).getResp().length], (arr1, arr2) -> addArray(arr1, arr2));
 		clusters = pts.stream().map(p -> p.getContribution()).reduce(Point.getEmptyPoints(clusters.size()), (p1,p2) -> addPoints(p1,p2));
 		IntStream.range(0, clusters.size()).forEach(i -> clusters.get(i).divideBy(total_resp[i]));
 	}
 
-	private Double[] addArray(Double[] arr1, Double[] arr2) {
-		return IntStream.range(0, arr1.length).mapToObj(i -> ((arr1[i]==null)? 0: arr1[i]) + ((arr2[i]==null)? 0: arr2[i])).collect(Collectors.toList()).toArray(new Double[0]);
+	private double[] addArray(double[] arr1, double[] arr2) {
+		return IntStream.range(0, arr1.length).mapToDouble(i -> arr1[i] + arr2[i]).toArray();
 	}
 
 	private List<Point> addPoints(List<Point> p1, List<Point> p2) {
@@ -67,7 +67,7 @@ public class Processor {
 		// 各点のクラスタ帰属度を出力
 		IntStream.range(0, clusters.size()).forEach(i -> 
 				System.out.println("cluster " + i + "'s total weight is " + 
-				pts.stream().map(p -> p.getResp()[i]).reduce(0.0, Double::sum)
+				pts.stream().mapToDouble(p -> p.getResp()[i]).reduce(0.0, Double::sum)
 				+ ". center coordinates are " + clusters.get(i)));
 
 		System.out.println(""); // 見やすくするため
