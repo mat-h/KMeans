@@ -21,7 +21,7 @@ public class Main {
 
 	private static List<Point> readCsv() throws FileNotFoundException {
 		List<Point> data = new ArrayList<Point>();
-		Scanner scanner = new Scanner(new File("C:\\r\\data\\hoge.csv"));
+		Scanner scanner = new Scanner(new File("C:\\r\\data\\mix.csv"));
 		while(scanner.hasNextLine()) {
 		
 			Point p = new Point();
